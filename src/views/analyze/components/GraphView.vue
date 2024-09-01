@@ -2,7 +2,7 @@
 import { onMounted, nextTick, ref } from 'vue'
 import data from '@/data/analyze.js'
 import G6Operation from '@/utils/g6Operation'
-import {useGraph} from '@/hooks/useGraph'
+import { useGraph } from '@/hooks/useGraph'
 
 const props = defineProps({
   width: {
@@ -10,8 +10,9 @@ const props = defineProps({
     required: true
   }
 })
+const emits = defineEmits(['closeLoading'])
 
-const graph = ref<any>()
+const graphInstance = ref<any>()
 
 function initGraph() {
   const graph: any = new G6Operation(props.width, 650)
@@ -20,16 +21,23 @@ function initGraph() {
   })
   graph.setData(data)
   graph.render()
-  graph.value = graph
+  graphInstance.value = graph
   graph.addMenuPlugin()
   //选中
   graph.selectedEdgeAndNode()
   //取消节点
   graph.clearAndCancel()
-  console.log(graph);
 
-  const {selectEdge,selectNode,deselectEdge,deselectNode,clearAllEdgeSelections,clearAllSelections,clearAllNodeSelections} = useGraph(graph)
-  
+  const {
+    selectEdge,
+    selectNode,
+    deselectEdge,
+    deselectNode,
+    clearAllEdgeSelections,
+    clearAllSelections,
+    clearAllNodeSelections
+  } = useGraph(graph)
+
   window.selectNode = selectNode
   window.selectEdge = selectEdge
   window.deselectNode = deselectNode
@@ -39,16 +47,14 @@ function initGraph() {
   window.clearAllNodeSelections = clearAllNodeSelections
 }
 
-
-
-
-onMounted(() => {
-  nextTick(() => {
+onMounted(async () => {
+  await nextTick(() => {
     initGraph()
+    emits('closeLoading')
   })
 })
 defineExpose({
-  graph: graph
+  graph: graphInstance
 })
 </script>
 
